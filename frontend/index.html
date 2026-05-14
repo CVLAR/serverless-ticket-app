@@ -1,0 +1,1069 @@
+ 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TicketFlow — Đặt Vé Sự Kiện</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080b12;
+      --surface: #0f1420;
+      --surface2: #161c2e;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6c63ff;
+      --accent2: #ff6b6b;
+      --accent3: #43e97b;
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --glow: rgba(108,99,255,0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* BG EFFECT */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -20%;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,107,107,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAVBAR */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,11,18,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #ff6b6b, #ffa07a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions { display: flex; gap: 12px; align-items: center; }
+
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); background: var(--surface); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      color: white;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,99,255,0.4); }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+    }
+    .btn-danger:hover { transform: translateY(-2px); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      color: #080b12;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(67,233,123,0.3);
+    }
+    .btn-success:hover { transform: translateY(-2px); }
+
+    /* PAGES */
+    .page { display: none; min-height: 100vh; padding-top: 80px; position: relative; z-index: 1; }
+    .page.active { display: block; }
+
+    /* HERO */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      text-align: center;
+      padding: 60px 24px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a78bfa;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #6c63ff, #ff6b6b, #43e97b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .hero-cta .btn { padding: 14px 32px; font-size: 1rem; border-radius: 12px; }
+
+    /* STATS */
+    .stats {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 80px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* AUTH PAGES */
+    .auth-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 40px 24px;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6c63ff, #ff6b6b, #43e97b);
+    }
+
+    .auth-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .auth-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    }
+
+    .form-group input::placeholder { color: var(--text-muted); }
+
+    .auth-card .btn { width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; margin-top: 8px; }
+
+    .auth-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .auth-link a {
+      color: #a78bfa;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .auth-link a:hover { text-decoration: underline; }
+
+    /* EVENTS PAGE */
+    .events-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    .events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .events-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 100px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 32px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 2px 10px rgba(108,99,255,0.3);
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .event-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .event-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(108,99,255,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(108,99,255,0.2);
+    }
+
+    .event-banner {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-banner-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .event-body { padding: 24px; }
+
+    .event-category {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .event-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .event-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .event-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .event-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .event-price {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #43e97b;
+    }
+
+    .ticket-badge {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    /* TICKET CARDS */
+    .ticket-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s;
+      animation: fadeUp 0.4s ease both;
+      flex-wrap: wrap;
+    }
+
+    .ticket-card:hover { border-color: rgba(108,99,255,0.3); }
+
+    .ticket-info h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .ticket-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .ticket-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .status-confirmed {
+      background: rgba(67,233,123,0.15);
+      color: #43e97b;
+      border: 1px solid rgba(67,233,123,0.3);
+    }
+
+    .status-cancelled {
+      background: rgba(255,107,107,0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,107,107,0.3);
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 9999;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: #0d2e1a; border: 1px solid rgba(67,233,123,0.4); color: #43e97b; }
+    .toast-error { background: #2e0d0d; border: 1px solid rgba(255,107,107,0.4); color: #ff6b6b; }
+    .toast-info { background: #1a1535; border: 1px solid rgba(108,99,255,0.4); color: #a78bfa; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 480px;
+      width: 100%;
+      transform: scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .modal-overlay.show .modal { transform: scale(1); }
+
+    .modal h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .modal p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+
+    .modal-actions { display: flex; gap: 12px; }
+    .modal-actions .btn { flex: 1; padding: 12px; }
+
+    /* LOADING */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 8px; color: var(--text); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .auth-card { padding: 32px 24px; }
+      .events-container { padding: 32px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">Ticket<span>Flow</span></div>
+  <div class="nav-actions" id="navActions">
+    <button class="btn btn-ghost" onclick="showPage('login')">Đăng nhập</button>
+    <button class="btn btn-primary" onclick="showPage('register')">Đăng ký</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL XÁC NHẬN HỦY VÉ -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <h3>Hủy vé này?</h3>
+    <p>Hành động này không thể hoàn tác. Vé sẽ bị hủy và bạn sẽ nhận email xác nhận.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Giữ lại</button>
+      <button class="btn btn-danger" id="confirmCancelBtn">Hủy vé</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge">✦ Nền tảng đặt vé thế hệ mới</div>
+    <h1>Khám phá & Đặt vé<br/><span class="highlight">Sự kiện tuyệt vời</span></h1>
+    <p>Hàng trăm sự kiện âm nhạc, công nghệ, nghệ thuật đang chờ bạn. Đặt vé nhanh chóng, an toàn và tiện lợi.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="showPage('register')">Bắt đầu ngay →</button>
+      <button class="btn btn-ghost" onclick="showPage('login')">Đăng nhập</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Sự kiện</div></div>
+      <div class="stat"><div class="stat-num">50K+</div><div class="stat-label">Người dùng</div></div>
+      <div class="stat"><div class="stat-num">99.9%</div><div class="stat-label">Uptime</div></div>
+      <div class="stat"><div class="stat-num">0đ</div><div class="stat-label">Phí dịch vụ</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: REGISTER -->
+<div class="page" id="page-register">
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Tạo tài khoản</h2>
+      <p>Tham gia TicketFlow và khám phá hàng trăm sự kiện</p>
+      <div class="form-group">
+        <label>Họ và tên</label>
+        <input type="text" id="reg-name" placeholder="Nguyễn Văn A"/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự"/>
+      </div>
+      <button class="btn btn-primary" id="registerBtn" onclick="handleRegister()">Tạo tài khoản</button>
+      <div class="auth-link">Đã có tài khoản? <a onclick="showPage('login')">Đăng nhập</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: LOGIN -->
+<div class="page" id="page-login">
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Chào mừng lại</h2>
+      <p>Đăng nhập để tiếp tục trải nghiệm</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="login-password" placeholder="Mật khẩu của bạn"/>
+      </div>
+      <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Đăng nhập</button>
+      <div class="auth-link">Chưa có tài khoản? <a onclick="showPage('register')">Đăng ký</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: EVENTS -->
+<div class="page" id="page-events">
+  <div class="events-container">
+    <div class="events-header">
+      <h2>Sự kiện nổi bật ✦</h2>
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName" style="font-size:0.9rem; font-weight:500;"></span>
+        <button class="btn btn-ghost" style="padding:6px 14px; font-size:0.82rem;" onclick="handleLogout()">Đăng xuất</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('events', this)">🎫 Sự kiện</button>
+      <button class="tab" onclick="switchTab('tickets', this)">🎟️ Vé của tôi</button>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div id="tab-events">
+      <div class="events-grid" id="eventsGrid">
+        <div class="empty-state">
+          <div class="icon">🔄</div>
+          <h3>Đang tải sự kiện...</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- TICKETS TAB -->
+    <div id="tab-tickets" style="display:none;">
+      <div id="ticketsList">
+        <div class="empty-state">
+          <div class="icon">🎟️</div>
+          <h3>Chưa có vé nào</h3>
+          <p>Đặt vé sự kiện đầu tiên của bạn!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ================== CONFIG ==================
+  const API_URL = 'https://qyv7m41j7a.execute-api.ap-southeast-1.amazonaws.com/prod';
+
+  // ================== STATE ==================
+  let currentUser = null;
+  let cancelTicketId = null;
+  let cancelUserId = null;
+
+  // ================== SAMPLE EVENTS (fallback) ==================
+  const sampleEvents = [
+    { eventId: 'evt-001', name: 'Vietnam Music Festival 2025', date: '20/06/2025 19:00', location: 'Sân vận động Mỹ Đình, Hà Nội', availableTickets: 150, price: 500000, category: 'Âm nhạc', emoji: '🎵', color: 'linear-gradient(135deg,#6c63ff,#a78bfa)' },
+    { eventId: 'evt-002', name: 'Tech Summit Saigon 2025', date: '15/07/2025 09:00', location: 'GEM Center, TP.HCM', availableTickets: 80, price: 800000, category: 'Công nghệ', emoji: '💻', color: 'linear-gradient(135deg,#43e97b,#38f9d7)' },
+    { eventId: 'evt-003', name: 'Art & Culture Night', date: '05/08/2025 18:00', location: 'Nhà hát Lớn, Hà Nội', availableTickets: 60, price: 350000, category: 'Nghệ thuật', emoji: '🎨', color: 'linear-gradient(135deg,#ff6b6b,#ffa07a)' },
+    { eventId: 'evt-004', name: 'Startup Pitch Battle', date: '10/08/2025 14:00', location: 'Coworking Space Q1, TP.HCM', availableTickets: 0, price: 200000, category: 'Kinh doanh', emoji: '🚀', color: 'linear-gradient(135deg,#f7971e,#ffd200)' },
+    { eventId: 'evt-005', name: 'Electronic Dance Night', date: '25/08/2025 21:00', location: 'Club Envy, TP.HCM', availableTickets: 200, price: 450000, category: 'Âm nhạc', emoji: '🎧', color: 'linear-gradient(135deg,#ee0979,#ff6a00)' },
+    { eventId: 'evt-006', name: 'Vietnam Book Fair 2025', date: '01/09/2025 08:00', location: 'Công viên Lê Văn Tám, TP.HCM', availableTickets: 500, price: 0, category: 'Giáo dục', emoji: '📚', color: 'linear-gradient(135deg,#4facfe,#00f2fe)' },
+  ];
+
+  const categoryColors = {
+    'Âm nhạc': { bg: 'rgba(108,99,255,0.2)', color: '#a78bfa' },
+    'Công nghệ': { bg: 'rgba(67,233,123,0.2)', color: '#43e97b' },
+    'Nghệ thuật': { bg: 'rgba(255,107,107,0.2)', color: '#ff6b6b' },
+    'Kinh doanh': { bg: 'rgba(247,151,30,0.2)', color: '#ffd200' },
+    'Giáo dục': { bg: 'rgba(79,172,254,0.2)', color: '#4facfe' },
+  };
+
+  // ================== NAVIGATION ==================
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (page === 'events') {
+      loadEvents();
+      updateNavForLoggedIn();
+    }
+  }
+
+  function updateNavForLoggedIn() {
+    document.getElementById('navActions').innerHTML = '';
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-events').style.display = tab === 'events' ? 'block' : 'none';
+    document.getElementById('tab-tickets').style.display = tab === 'tickets' ? 'block' : 'none';
+    if (tab === 'tickets') loadTickets();
+  }
+
+  // ================== TOAST ==================
+  function showToast(msg, type = 'info') {
+    const icons = { success: '✓', error: '✕', info: 'ℹ' };
+    const t = document.getElementById('toast');
+    t.className = `toast toast-${type} show`;
+    t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ================== MODAL ==================
+  function openCancelModal(ticketId, userId) {
+    cancelTicketId = ticketId;
+    cancelUserId = userId;
+    document.getElementById('cancelModal').classList.add('show');
+    document.getElementById('confirmCancelBtn').onclick = () => handleCancelTicket(ticketId, userId);
+  }
+
+  function closeModal() {
+    document.getElementById('cancelModal').classList.remove('show');
+  }
+
+  // ================== AUTH ==================
+  async function handleRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    if (!name || !email || !password) return showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+    if (password.length < 6) return showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+
+    const btn = document.getElementById('registerBtn');
+    btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: name, email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+        setTimeout(() => showPage('login'), 1500);
+      } else {
+        showToast(data.message || 'Đăng ký thất bại!', 'error');
+      }
+    } catch {
+      showToast('Không kết nối được server!', 'error');
+    } finally {
+      btn.innerHTML = 'Tạo tài khoản';
+      btn.disabled = false;
+    }
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) return showToast('Vui lòng điền đầy đủ!', 'error');
+
+    const btn = document.getElementById('loginBtn');
+    btn.innerHTML = '<span class="spinner"></span> Đang đăng nhập...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        currentUser = { userId: data.userId, fullName: data.fullName, email: data.email };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        document.getElementById('userName').textContent = data.fullName;
+        document.getElementById('userAvatar').textContent = data.fullName[0].toUpperCase();
+        showToast(`Chào mừng, ${data.fullName}!`, 'success');
+        setTimeout(() => showPage('events'), 800);
+      } else {
+        showToast(data.message || 'Đăng nhập thất bại!', 'error');
+      }
+    } catch {
+      showToast('Không kết nối được server!', 'error');
+    } finally {
+      btn.innerHTML = 'Đăng nhập';
+      btn.disabled = false;
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('currentUser');
+    currentUser = null;
+    document.getElementById('navActions').innerHTML = `
+      <button class="btn btn-ghost" onclick="showPage('login')">Đăng nhập</button>
+      <button class="btn btn-primary" onclick="showPage('register')">Đăng ký</button>
+    `;
+    showToast('Đã đăng xuất!', 'info');
+    showPage('home');
+  }
+
+  // ================== EVENTS ==================
+  async function loadEvents() {
+    const grid = document.getElementById('eventsGrid');
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🔄</div><h3>Đang tải...</h3></div>';
+
+    let events = sampleEvents;
+    try {
+      const res = await fetch(`${API_URL}/events`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.events && data.events.length > 0) events = data.events;
+      }
+    } catch {}
+
+    if (!events.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="icon">🎫</div><h3>Chưa có sự kiện nào</h3></div>';
+      return;
+    }
+
+    grid.innerHTML = events.map((ev, i) => {
+      const catStyle = categoryColors[ev.category] || { bg: 'rgba(108,99,255,0.2)', color: '#a78bfa' };
+      const isSoldOut = ev.availableTickets === 0;
+      return `
+        <div class="event-card" style="animation-delay:${i * 0.08}s">
+          <div class="event-banner">
+            <div class="event-banner-inner" style="background:${ev.color || 'linear-gradient(135deg,#6c63ff,#a78bfa)'}">
+              ${ev.emoji || '🎫'}
+            </div>
+          </div>
+          <div class="event-body">
+            <span class="event-category" style="background:${catStyle.bg}; color:${catStyle.color}">${ev.category || 'Sự kiện'}</span>
+            <div class="event-title">${ev.name}</div>
+            <div class="event-meta">
+              <div class="event-meta-item">📅 ${ev.date}</div>
+              <div class="event-meta-item">📍 ${ev.location}</div>
+            </div>
+            <div class="event-footer">
+              <div class="event-price">${ev.price === 0 ? 'Miễn phí' : ev.price.toLocaleString('vi-VN') + 'đ'}</div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span class="ticket-badge">${isSoldOut ? '❌ Hết vé' : `✅ ${ev.availableTickets} vé`}</span>
+                ${isSoldOut ? '' : `<button class="btn btn-success" style="padding:8px 16px;font-size:0.82rem;" onclick="bookTicket('${ev.eventId}','${ev.name}')">Đặt vé</button>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function bookTicket(eventId, eventName) {
+    if (!currentUser) return showToast('Vui lòng đăng nhập!', 'error');
+    showToast(`Đang đặt vé "${eventName}"...`, 'info');
+
+    try {
+      const res = await fetch(`${API_URL}/tickets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.userId,
+          eventId,
+          userEmail: currentUser.email,
+          userName: currentUser.fullName
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('🎉 Đặt vé thành công! Kiểm tra email của bạn.', 'success');
+        loadEvents();
+      } else {
+        showToast(data.message || 'Đặt vé thất bại!', 'error');
+      }
+    } catch {
+      showToast('Không kết nối được server!', 'error');
+    }
+  }
+
+  // ================== TICKETS ==================
+  async function loadTickets() {
+    if (!currentUser) return;
+    const list = document.getElementById('ticketsList');
+    list.innerHTML = '<div class="empty-state"><div class="icon">🔄</div><h3>Đang tải vé...</h3></div>';
+
+    try {
+      const res = await fetch(`${API_URL}/tickets?userId=${currentUser.userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        renderTickets(data.tickets || []);
+      } else {
+        renderTickets([]);
+      }
+    } catch {
+      renderTickets([]);
+    }
+  }
+
+  function renderTickets(tickets) {
+    const list = document.getElementById('ticketsList');
+    if (!tickets.length) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">🎟️</div><h3>Chưa có vé nào</h3><p>Hãy đặt vé sự kiện đầu tiên!</p></div>';
+      return;
+    }
+    list.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px;">` +
+      tickets.map((t, i) => `
+        <div class="ticket-card" style="animation-delay:${i * 0.08}s">
+          <div class="ticket-info">
+            <h4>${t.eventName}</h4>
+            <p>Mã vé: ${t.ticketId}</p>
+            <p>Đặt lúc: ${new Date(t.bookedAt).toLocaleString('vi-VN')}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span class="ticket-status ${t.status === 'CONFIRMED' ? 'status-confirmed' : 'status-cancelled'}">
+              ${t.status === 'CONFIRMED' ? '● Đã xác nhận' : '● Đã hủy'}
+            </span>
+            ${t.status === 'CONFIRMED' ? `<button class="btn btn-danger" style="padding:8px 16px;font-size:0.82rem;" onclick="openCancelModal('${t.ticketId}','${t.userId}')">Hủy vé</button>` : ''}
+          </div>
+        </div>
+      `).join('') + '</div>';
+  }
+
+  async function handleCancelTicket(ticketId, userId) {
+    closeModal();
+    try {
+      const res = await fetch(`${API_URL}/tickets/${ticketId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Hủy vé thành công!', 'success');
+        loadTickets();
+      } else {
+        showToast(data.message || 'Hủy vé thất bại!', 'error');
+      }
+    } catch {
+      showToast('Không kết nối được server!', 'error');
+    }
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const activePage = document.querySelector('.page.active')?.id;
+      if (activePage === 'page-login') handleLogin();
+      if (activePage === 'page-register') handleRegister();
+    }
+  });
+  // Khôi phục đăng nhập khi refresh
+const savedUser = localStorage.getItem('currentUser');
+if (savedUser) {
+  currentUser = JSON.parse(savedUser);
+  document.getElementById('userName').textContent = currentUser.fullName;
+  document.getElementById('userAvatar').textContent = currentUser.fullName[0].toUpperCase();
+  showPage('events');
+}
+</script>
+</body>
+</html>
